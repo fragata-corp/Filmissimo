@@ -1,40 +1,16 @@
-const axios = require("axios");
-const Dev = require("../models/Filme");
+const Filme = require("../models/Filme");
 
-module.exports = {
-  async index(req, res) {
-    const { user } = req.headers;
-    const loggedDev = await Dev.findById(user);
-
-    const users = await Dev.find({
-      $and: [
-        { _id: { $ne: user } },
-        { _id: { $nin: loggedDev.likes } },
-        { _id: { $nin: loggedDev.dislikes } }
-      ]
-    });
-    return res.json(users);
-  },
-
+class FilmeController {
   async store(req, res) {
-    const { username } = req.body;
-    const response = await axios.get(
-      `https://api.github.com/users/${username}`
-    );
-    const userExists = await Dev.findOne({ user: username });
-
-    if (userExists) {
-      return res.json(userExists);
-    }
-    const { name, bio, avatar_url: avatar } = response.data;
-
-    const dev = await Dev.create({
-      name,
-      user: username,
-      bio,
-      avatar
-    });
-
-    return res.json(dev);
+    const filme = await Filme.create({ title: req.body.title });
+    return res.json(filme);
   }
-};
+
+  async show(req, res) {
+    const filme = await Filme.findById(req.params.id );
+
+    return res.json(filme);
+  }
+}
+
+module.exports = new FilmeController();
